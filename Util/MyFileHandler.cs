@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MyFileHandler
 {
-    private static string fileExtension = ".stars";
+    private static string fileExtension = ".dg";
 
     public static bool ReadFile(GameFile gameFile, out string data, bool autoCreateIfMissing = false, string defaultData = "")
     {
