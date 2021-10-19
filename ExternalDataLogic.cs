@@ -62,7 +62,10 @@ public class ExternalDataLogic : InterfaceLogicBase
     private static void ApplyDataToChildType(BehaviourBase target, JToken childToken)
     {
         Dictionary<string, object> childTypes = (childToken["types"] as JToken).ToObject<Dictionary<string, object>>();
-        List<BehaviourBase> children = target.GetComponentsInChildren(Type.GetType((string)childToken["component"])).Cast<BehaviourBase>().ToList();
+        Type childType = Type.GetType((string)childToken["component"]);
+        if (childType == null)
+            return;
+        List<BehaviourBase> children = target.GetComponentsInChildren(childType).Cast<BehaviourBase>().ToList();
         foreach (string key in childTypes.Keys)
         {
             ApplyDataToGameobject(children.Find(x => x.gameObject.name == key), (JToken)childTypes[key]);
