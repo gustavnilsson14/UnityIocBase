@@ -121,6 +121,12 @@ public static class ReflectionUtil
         Type objectType = original.GetType();
         return objectType.GetFields(flags);
     }
+
+    public static PropertyInfo[] GetPropertyInfos(object original, BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default)
+    {
+        Type objectType = original.GetType();
+        return objectType.GetProperties(flags);
+    }
 }
 [System.Serializable]
 public class StoredObject

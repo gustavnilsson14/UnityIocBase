@@ -27,7 +27,6 @@ public class ExternalDataLogic : InterfaceLogicBase
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
         MyFileHandler.ReadFile(GameFile.CONTENT, out string data, true);
-        Debug.Log(data);
         ExternalDataLogic.data = JObject.Parse(data);
     }
 

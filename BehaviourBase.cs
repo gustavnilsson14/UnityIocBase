@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -14,6 +16,8 @@ public class BehaviourBase : MonoBehaviour, IBase, IPointerClickHandler
     public ClickEvent onClick { get; set; }
     public int uniqueId { get; set; }
     public GameObject GetGameObject() => gameObject;
+
+    public event PropertyChangedEventHandler PropertyChanged;
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -61,6 +65,11 @@ public class BehaviourBase : MonoBehaviour, IBase, IPointerClickHandler
             }
         }
         return false;
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 
