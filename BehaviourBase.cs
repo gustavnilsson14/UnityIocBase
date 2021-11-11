@@ -11,6 +11,7 @@ public class BehaviourBase : MonoBehaviour, IBase, IPointerClickHandler
 {
     public DestroyEvent onDestroy { get; set; }
     public CollisionEvent onCollision { get; set; }
+    public ParticleCollisionEvent onParticleCollision { get; set; }
     public TriggerEvent onTriggerEnter { get; set; }
     public TriggerEvent onTriggerExit { get; set; }
     public ClickEvent onClick { get; set; }
@@ -24,6 +25,12 @@ public class BehaviourBase : MonoBehaviour, IBase, IPointerClickHandler
         if (onCollision == null)
             return;
         onCollision.Invoke(this, collision);
+    }
+    private void OnParticleCollision(GameObject other)
+    {
+        if (onParticleCollision == null)
+            return;
+        onParticleCollision.Invoke(this, other);
     }
     private void OnTriggerEnter(Collider collider)
     {

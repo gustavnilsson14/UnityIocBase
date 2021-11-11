@@ -62,6 +62,7 @@ public class InterfaceLogicBase : MonoBehaviour
         newBase.uniqueId = newInstance.GetInstanceID();
         newBase.onDestroy = new DestroyEvent(newBase, "Destroy");
         newBase.onCollision = new CollisionEvent(newBase, "Collision");
+        newBase.onParticleCollision = new ParticleCollisionEvent(newBase, "ParticleCollision");
         newBase.onTriggerEnter = new TriggerEvent(newBase, "TriggerEnter");
         newBase.onTriggerExit = new TriggerEvent(newBase, "TriggerExit");
         newBase.onClick = new ClickEvent(newBase, "Click");
@@ -98,6 +99,7 @@ public interface IBase
     int uniqueId { get; set; }
     GameObject GetGameObject();
     DestroyEvent onDestroy { get; set; }
+    ParticleCollisionEvent onParticleCollision { get; set; }
     CollisionEvent onCollision { get; set; }
     TriggerEvent onTriggerEnter { get; set; }
     TriggerEvent onTriggerExit { get; set; }
@@ -113,6 +115,12 @@ public class DestroyEvent : AnimationEvent<IBase>
 public class CollisionEvent : AnimationEvent<IBase, Collision>
 {
     public CollisionEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class ParticleCollisionEvent : AnimationEvent<IBase, GameObject>
+{
+    public ParticleCollisionEvent(IBase b = null, string name = "default") : base(b, name)
     {
     }
 }
