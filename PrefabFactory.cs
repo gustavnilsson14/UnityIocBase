@@ -18,7 +18,7 @@ public class PrefabFactory : InterfaceLogicBase
 
     public GameObject Create(GameObject prefab)
     {
-        return Create(prefab, null);
+        return Create(prefab, transform, transform);
     }
     public GameObject Create(GameObject prefab, Transform parent)
     {
@@ -26,10 +26,19 @@ public class PrefabFactory : InterfaceLogicBase
     }
     public GameObject Create(GameObject prefab, Transform parent, Transform origin)
     {
+        return Create(prefab, parent, origin.position);
+    }
+
+    public GameObject Create(GameObject prefab, Transform parent, Vector3 origin)
+    {
         GameObject newGameObject = Instantiate(prefab, parent);
-        newGameObject.transform.position = origin.position;
+        newGameObject.transform.position = origin;
         StartCoroutine(RegisterNewInstance(newGameObject));
         return newGameObject;
+    }
+
+    public void ManualRegister(GameObject newGameObject) {
+        StartCoroutine(RegisterNewInstance(newGameObject));
     }
 
     public IEnumerator RegisterNewInstance(GameObject newGameObject)
@@ -38,8 +47,6 @@ public class PrefabFactory : InterfaceLogicBase
         yield return 0;
         onRegisterInternalListeners.Invoke(newGameObject);
     }
-
-
 
     public float deltaTimeLimit;
     public bool logDeltaTimeLimit = false;

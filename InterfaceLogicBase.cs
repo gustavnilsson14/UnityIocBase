@@ -47,6 +47,14 @@ public class InterfaceLogicBase : MonoBehaviour
         initMethod((T)newBase);
     }
 
+    protected void RegisterListeners<T>(Action<T> registerMethod, IBase newBase) {
+        if (!(newBase is T))
+            return;
+        if ((T)newBase == null)
+            return;
+        registerMethod((T)newBase);
+    }
+
     protected virtual void OnInstantiate(GameObject newInstance)
     {
         if (!newInstance.TryGetComponent(out IBase newBase))
@@ -92,6 +100,11 @@ public class InterfaceLogicBase : MonoBehaviour
             return;
         instanceLists.ForEach(x => x.Remove(b));
     }
+
+    public IBase GetById(int uniueqId)
+    {
+        return myInstances.Find(x => x.GetComponent<IBase>().uniqueId == uniueqId).GetComponent<IBase>();
+    }
 }
 
 public interface IBase
@@ -133,6 +146,12 @@ public class TriggerEvent : AnimationEvent<IBase, Collider>
 public class ClickEvent : AnimationEvent<IBase>
 {
     public ClickEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class BaseEvent : AnimationEvent<IBase>
+{
+    public BaseEvent(IBase b = null, string name = "default") : base(b, name)
     {
     }
 }
