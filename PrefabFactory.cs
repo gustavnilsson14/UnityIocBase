@@ -11,6 +11,13 @@ public class PrefabFactory : InterfaceLogicBase
     public InstantiateEvent onRegisterInternalListeners = new InstantiateEvent();
     public Transform gameRoot;
 
+
+    protected override IEnumerator DelayedPostStart()
+    {
+        yield return 0;
+        PostStart();
+    }
+
     protected override void PostStart()
     {
         GameObject.FindObjectsOfType(typeof(GameObject)).ToList().ForEach(x => StartCoroutine(RegisterNewInstance(x as GameObject)));
@@ -26,13 +33,19 @@ public class PrefabFactory : InterfaceLogicBase
     }
     public GameObject Create(GameObject prefab, Transform parent, Transform origin)
     {
-        return Create(prefab, parent, origin.position);
+        return Create(prefab, parent, origin.position, origin.rotation);
     }
 
     public GameObject Create(GameObject prefab, Transform parent, Vector3 origin)
     {
+        return Create(prefab, parent, origin, Quaternion.identity);
+    }
+
+    public GameObject Create(GameObject prefab, Transform parent, Vector3 origin, Quaternion rotation)
+    {
         GameObject newGameObject = Instantiate(prefab, parent);
         newGameObject.transform.position = origin;
+        newGameObject.transform.rotation = rotation;
         StartCoroutine(RegisterNewInstance(newGameObject));
         return newGameObject;
     }

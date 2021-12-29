@@ -22,9 +22,9 @@ public class InterfaceLogicBase : MonoBehaviour
         StartCoroutine(DelayedPostStart());
     }
 
-    private IEnumerator DelayedPostStart()
+    protected virtual IEnumerator DelayedPostStart()
     {
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.1f);
         PostStart();
     }
 
@@ -101,9 +101,17 @@ public class InterfaceLogicBase : MonoBehaviour
         instanceLists.ForEach(x => x.Remove(b));
     }
 
-    public IBase GetById(int uniueqId)
+    public T GetById<T>(int uniueqId) where T : IBase
     {
-        return myInstances.Find(x => x.GetComponent<IBase>().uniqueId == uniueqId).GetComponent<IBase>();
+        GameObject result = myInstances.Find(x => x.GetComponent<IBase>().uniqueId == uniueqId);
+        if (result == null)
+            return default(T);
+        return result.GetComponent<T>();
+    }
+    public bool TryGetById<T>(int uniueqId, out T o) where T : IBase
+    {
+        o = GetById<T>(uniueqId);
+        return o != null;
     }
 }
 

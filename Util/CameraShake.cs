@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum CameraShakeType { 
-	DEFAULT, HIT
+	NONE, DEFAULT, HIT
 }
 
 public class CameraShake : MonoBehaviour
@@ -19,7 +19,9 @@ public class CameraShake : MonoBehaviour
 	private Vector3 hitDirection;
 	private float hitCurrentDistance;
 	private float hitDistance;
+	
 	public bool test;
+	public CameraShakeType testType;
 
     private void Awake()
 	{
@@ -35,10 +37,14 @@ public class CameraShake : MonoBehaviour
 		HandleShakeType();
 		
 	}
-	public void Shake(CameraShakeType shakeType = CameraShakeType.DEFAULT, float duration = 0.3f)
+	public void Shake(CameraShakeType shakeType = CameraShakeType.NONE, float duration = 0.3f, float amount = 0.1f)
 	{
+		if (shakeType == CameraShakeType.NONE)
+			return;
 		this.shakeType = shakeType;
 		this.duration = duration;
+		this.shakeAmount = amount;
+		this.hitAmount = amount;
 		hitDistance = duration/2;
 		hitCurrentDistance = 0;
 		transform.localPosition = originalPos;
@@ -71,7 +77,7 @@ public class CameraShake : MonoBehaviour
 		if (!test)
 			return;
 		test = false;
-		Shake(CameraShakeType.HIT);
+		Shake(testType);
 	}
 
 	private void ShakeUpdate()

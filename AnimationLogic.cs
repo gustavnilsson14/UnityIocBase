@@ -9,6 +9,17 @@ public class AnimationLogic : InterfaceLogicBase
 {
     public static AnimationLogic I;
 
+    protected override void OnInstantiate(GameObject newInstance, IBase newBase)
+    {
+        base.OnInstantiate(newInstance, newBase);
+        Initialize<IAnimated>(InitAnimated, newBase);
+    }
+
+    private void InitAnimated(IAnimated animated)
+    {
+        animated.animator = animated.GetGameObject().GetComponent<Animator>();
+    }
+
     public void RunAnimationEvent(Animator animator, string animationKey, bool useParameterType, AnimatorControllerParameterType parameterType) {
         if (!useParameterType)
         {
