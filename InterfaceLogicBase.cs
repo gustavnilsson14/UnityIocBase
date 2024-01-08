@@ -3,12 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public class InterfaceLogicBase : MonoBehaviour
 {
     public List<GameObject> myInstances = new List<GameObject>();
+    private float nextIntervalUpdate;
+    public bool debug;
 
     protected virtual void Awake()
     {
@@ -24,8 +28,18 @@ public class InterfaceLogicBase : MonoBehaviour
 
     protected virtual IEnumerator DelayedPostStart()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(1.1f);
         PostStart();
+    }
+
+    protected virtual void Update()
+    {
+        if (Time.time > nextIntervalUpdate) IntervalUpdate(InternalSettings.normalUpdate);
+    }
+
+    protected virtual void IntervalUpdate(float interval)
+    {
+        nextIntervalUpdate = Time.time + interval;
     }
 
     protected virtual void PostStart() { }
@@ -63,17 +77,23 @@ public class InterfaceLogicBase : MonoBehaviour
         newInstance.GetComponents<IBase>().ToList().ForEach(x => OnInstantiate(newInstance, x));
     }
     protected virtual void OnInstantiate(GameObject newInstance, IBase newBase) {
-        if (newBase.onDestroy != null) {
-            newBase.onDestroy.AddListener(UnRegister);
+        if (newBase.onDisable != null) {
+            newBase.onDisable.AddListener(UnRegister);
             return;
         }
         newBase.uniqueId = newInstance.GetInstanceID();
-        newBase.onDestroy = new DestroyEvent(newBase, "Destroy");
+        newBase.onDisable = new DisableEvent(newBase, "Destroy");
+        newBase.onDisable.AddListener(UnRegister);
         newBase.onCollision = new CollisionEvent(newBase, "Collision");
         newBase.onParticleCollision = new ParticleCollisionEvent(newBase, "ParticleCollision");
         newBase.onTriggerEnter = new TriggerEvent(newBase, "TriggerEnter");
         newBase.onTriggerExit = new TriggerEvent(newBase, "TriggerExit");
         newBase.onClick = new ClickEvent(newBase, "Click");
+        newBase.onMouseDown = new MouseDownEvent(newBase, "MouseDown");
+        newBase.onMouseUp = new MouseUpEvent(newBase, "MouseUp");
+        newBase.onBeginDrag = new BeginDragEvent(newBase, "BeginDrag");
+        newBase.onDrag = new DragEvent(newBase, "Drag");
+        newBase.onEndDrag = new EndDragEvent(newBase, "EndDrag");
     }
 
     protected virtual void OnRegisterInternalListeners(GameObject newInstance)
@@ -86,7 +106,7 @@ public class InterfaceLogicBase : MonoBehaviour
     }
     protected virtual void OnRegisterInternalListeners(GameObject newInstance, IBase newBase)
     {
-        newBase.onDestroy.AddListener(UnRegister);
+        newBase.onDisable.AddListener(UnRegister);
     }
 
     protected virtual void UnRegister(IBase b)
@@ -113,23 +133,39 @@ public class InterfaceLogicBase : MonoBehaviour
         o = GetById<T>(uniueqId);
         return o != null;
     }
+
+    public bool IsNull(object obj)
+    {
+        if (obj == null) return true;
+        if (obj.ToString() == "null") return true;
+        return false;
+    }
 }
 
 public interface IBase
 {
     int uniqueId { get; set; }
+    string GetName();
     GameObject GetGameObject();
-    DestroyEvent onDestroy { get; set; }
+    Transform GetTransform();
+    Vector3 GetPosition();
+    T GetComponent<T>();
+    DisableEvent onDisable { get; set; }
     ParticleCollisionEvent onParticleCollision { get; set; }
     CollisionEvent onCollision { get; set; }
     TriggerEvent onTriggerEnter { get; set; }
     TriggerEvent onTriggerExit { get; set; }
     ClickEvent onClick { get; set; }
+    MouseDownEvent onMouseDown { get; set; }
+    MouseUpEvent onMouseUp { get; set; }
+    BeginDragEvent onBeginDrag { get; set; }
+    DragEvent onDrag { get; set; }
+    EndDragEvent onEndDrag { get; set; }
     public T As<T>() where T : class;
 }
-public class DestroyEvent : AnimationEvent<IBase>
+public class DisableEvent : AnimationEvent<IBase>
 {
-    public DestroyEvent(IBase b = null, string name = "default") : base(b, name)
+    public DisableEvent(IBase b = null, string name = "default") : base(b, name)
     {
     }
 }
@@ -151,9 +187,39 @@ public class TriggerEvent : AnimationEvent<IBase, Collider>
     {
     }
 }
-public class ClickEvent : AnimationEvent<IBase>
+public class ClickEvent : AnimationEvent<IBase, PointerEventData>
 {
     public ClickEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class MouseUpEvent : AnimationEvent<IBase, PointerEventData>
+{
+    public MouseUpEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class MouseDownEvent : AnimationEvent<IBase, PointerEventData>
+{
+    public MouseDownEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class BeginDragEvent : AnimationEvent<IBase, PointerEventData>
+{
+    public BeginDragEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class DragEvent : AnimationEvent<IBase, PointerEventData>
+{
+    public DragEvent(IBase b = null, string name = "default") : base(b, name)
+    {
+    }
+}
+public class EndDragEvent : AnimationEvent<IBase, PointerEventData>
+{
+    public EndDragEvent(IBase b = null, string name = "default") : base(b, name)
     {
     }
 }

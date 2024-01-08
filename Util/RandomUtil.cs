@@ -41,6 +41,10 @@ public class RandomUtil
     {
         return random.NextDouble() > 0.5f;
     }
+    public static T RandomIndex<T>(List<T> list)
+    {
+        return list[RandomInt(0, list.Count)];
+    }
 }
 public interface IRarityObject : IBase
 {

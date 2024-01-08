@@ -11,7 +11,6 @@ public class PrefabFactory : InterfaceLogicBase
     public InstantiateEvent onRegisterInternalListeners = new InstantiateEvent();
     public Transform gameRoot;
 
-
     protected override IEnumerator DelayedPostStart()
     {
         yield return 0;
@@ -20,7 +19,7 @@ public class PrefabFactory : InterfaceLogicBase
 
     protected override void PostStart()
     {
-        GameObject.FindObjectsOfType(typeof(GameObject)).ToList().ForEach(x => StartCoroutine(RegisterNewInstance(x as GameObject)));
+        FindObjectsOfType(typeof(GameObject)).ToList().ForEach(x => StartCoroutine(RegisterNewInstance(x as GameObject, false)));
     }
 
     public GameObject Create(GameObject prefab)
@@ -54,11 +53,18 @@ public class PrefabFactory : InterfaceLogicBase
         StartCoroutine(RegisterNewInstance(newGameObject));
     }
 
-    public IEnumerator RegisterNewInstance(GameObject newGameObject)
+    public IEnumerator RegisterNewInstance(GameObject newGameObject, bool recursive = true)
     {
         onInstantiate.Invoke(newGameObject);
+        List<IBase> children = newGameObject.GetComponentsInChildren<IBase>()
+                .Where(c => c.GetGameObject() != newGameObject)
+                .ToList();
+        if (recursive)
+            children.ForEach(b => onInstantiate.Invoke(b.GetGameObject()));
         yield return 0;
         onRegisterInternalListeners.Invoke(newGameObject);
+        if (recursive) 
+            children.ForEach(b => onRegisterInternalListeners.Invoke(b.GetGameObject()));
     }
 
     public float deltaTimeLimit;

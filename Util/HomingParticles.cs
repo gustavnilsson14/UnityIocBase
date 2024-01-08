@@ -28,10 +28,12 @@ public class HomingParticles : MonoBehaviour
         target = this.target;
         if (target != null)
             return true;
+        /*
         if (EnemyLogic.I.enemies.Count == 0)
             return false;
 
         target = MovementLogic.I.GetTrackMoverCart(EnemyLogic.I.enemies[0] as ITrackMover).transform;
+        */
         return target != null;
     }
 }

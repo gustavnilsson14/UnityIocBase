@@ -14,6 +14,8 @@ public class SingleUnityLayer
         }
     }
 
+    public bool InLayerMask(LayerMask layerMask) => layerMask == (layerMask | (1 << GetLayerIndex()));
+
     public int Mask
     {
         get { return 1 << m_LayerIndex; }

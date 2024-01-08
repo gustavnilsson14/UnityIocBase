@@ -9,6 +9,8 @@ public class AnimationLogic : InterfaceLogicBase
 {
     public static AnimationLogic I;
 
+    public List<IAnimated> animateds = new List<IAnimated>();
+
     protected override void OnInstantiate(GameObject newInstance, IBase newBase)
     {
         base.OnInstantiate(newInstance, newBase);
@@ -17,10 +19,12 @@ public class AnimationLogic : InterfaceLogicBase
 
     private void InitAnimated(IAnimated animated)
     {
+        if(debug) animateds.Add(animated);
         animated.animator = animated.GetGameObject().GetComponent<Animator>();
     }
 
     public void RunAnimationEvent(Animator animator, string animationKey, bool useParameterType, AnimatorControllerParameterType parameterType) {
+        if (IsNull(animator)) return;
         if (!useParameterType)
         {
             animator.Play(animationKey);
@@ -35,36 +39,86 @@ public class AnimationLogic : InterfaceLogicBase
                 animator.SetTrigger(animationKey);
                 return;
         }
-
     }
     public void RunAnimationEvent(AnimationEvent animationEvent)
     {
         bool useParameterType = animationEvent.TryGetParameterType(out AnimatorControllerParameterType parameterType);
-        RunAnimationEvent(animationEvent.animator, $"{animationEvent.GetType().ToString()}_{animationEvent.GetName()}", useParameterType, parameterType);
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        RunAnimationEvent(animationEvent.animator, animationKey, useParameterType, parameterType);
     }
 
     internal void RunAnimationEvent<T0>(AnimationEvent<T0> animationEvent)
     {
         bool useParameterType = animationEvent.TryGetParameterType(out AnimatorControllerParameterType parameterType);
-        RunAnimationEvent(animationEvent.animator, $"{animationEvent.GetType().ToString()}_{animationEvent.GetName()}", useParameterType, parameterType);
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        RunAnimationEvent(animationEvent.animator, animationKey, useParameterType, parameterType);
     }
 
     internal void RunAnimationEvent<T0, T1>(AnimationEvent<T0, T1> animationEvent)
     {
         bool useParameterType = animationEvent.TryGetParameterType(out AnimatorControllerParameterType parameterType);
-        RunAnimationEvent(animationEvent.animator, $"{animationEvent.GetType().ToString()}_{animationEvent.GetName()}", useParameterType, parameterType);
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        RunAnimationEvent(animationEvent.animator, animationKey, useParameterType, parameterType);
     }
 
     internal void RunAnimationEvent<T0, T1, T2>(AnimationEvent<T0, T1, T2> animationEvent)
     {
         bool useParameterType = animationEvent.TryGetParameterType(out AnimatorControllerParameterType parameterType);
-        RunAnimationEvent(animationEvent.animator, $"{animationEvent.GetType().ToString()}_{animationEvent.GetName()}", useParameterType, parameterType);
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        RunAnimationEvent(animationEvent.animator, animationKey, useParameterType, parameterType);
     }
 
     internal void RunAnimationEvent<T0, T1, T2, T3>(AnimationEvent<T0, T1, T2, T3> animationEvent)
     {
         bool useParameterType = animationEvent.TryGetParameterType(out AnimatorControllerParameterType parameterType);
-        RunAnimationEvent(animationEvent.animator, $"{animationEvent.GetType().ToString()}_{animationEvent.GetName()}", useParameterType, parameterType);
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        RunAnimationEvent(animationEvent.animator, animationKey, useParameterType, parameterType);
+    }
+
+    internal void SetBool(Animator animator, string animationKey, bool v) => animator.SetBool(animationKey, v);
+
+    internal void UnsetBool(Animator animator, string animationKey)
+    {
+        animator.SetBool(animationKey, false);
+    }
+    internal void UnsetBool(AnimationEvent animationEvent)
+    {
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        UnsetBool(animationEvent.animator, animationKey);
+    }
+    internal void UnsetBool<T0>(AnimationEvent<T0> animationEvent)
+    {
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        UnsetBool(animationEvent.animator, animationKey);
+    }
+    internal void UnsetBool<T0, T1>(AnimationEvent<T0, T1> animationEvent)
+    {
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        UnsetBool(animationEvent.animator, animationKey);
+    }
+    internal void UnsetBool<T0, T1, T2>(AnimationEvent<T0, T1, T2> animationEvent)
+    {
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        UnsetBool(animationEvent.animator, animationKey);
+    }
+    internal void UnsetBool<T0, T1, T2, T3>(AnimationEvent<T0, T1, T2, T3> animationEvent)
+    {
+        if (!animationEvent.TryGetAnimationKey(out string animationKey)) return;
+        UnsetBool(animationEvent.animator, animationKey);
+    }
+
+    public void SetActiveLayers(IAnimated animated, List<string> layers, bool invert = false)
+    {
+        for (int i = 0; i < animated.animator.layerCount; i++)
+        {
+            string name = animated.animator.GetLayerName(i);
+            if (IsNull(layers) || !layers.Any() || layers.Contains(name))
+            {
+                animated.animator.SetLayerWeight(i, !invert ? 1 : 0);
+                continue;
+            }
+            animated.animator.SetLayerWeight(i, !invert ? 0 : 1);
+        }
     }
 }
 public interface IAnimated : IBase { 
@@ -96,6 +150,11 @@ public class AnimationEvent : UnityEvent
         return false;
     }
     public virtual string GetName() => name;
+    public virtual bool TryGetAnimationKey(out string animationKey)
+    {
+        animationKey = $"{GetType()}_{GetName()}";
+        return true;
+    }
 }
 public class AnimationEvent<T0> : UnityEvent<T0>
 {
@@ -123,6 +182,11 @@ public class AnimationEvent<T0> : UnityEvent<T0>
         return false;
     }
     public virtual string GetName() => name;
+    public virtual bool TryGetAnimationKey(out string animationKey)
+    {
+        animationKey = $"{GetType()}_{GetName()}";
+        return true;
+    }
 }
 public class AnimationEvent<T0, T1> : UnityEvent<T0, T1>
 {
@@ -150,6 +214,11 @@ public class AnimationEvent<T0, T1> : UnityEvent<T0, T1>
         return false;
     }
     public virtual string GetName() => name;
+    public virtual bool TryGetAnimationKey(out string animationKey)
+    {
+        animationKey = $"{GetType()}_{GetName()}";
+        return true;
+    }
 }
 public class AnimationEvent<T0, T1, T2> : UnityEvent<T0, T1, T2>
 {
@@ -177,6 +246,11 @@ public class AnimationEvent<T0, T1, T2> : UnityEvent<T0, T1, T2>
         return false;
     }
     public virtual string GetName() => name;
+    public virtual bool TryGetAnimationKey(out string animationKey)
+    {
+        animationKey = $"{GetType()}_{GetName()}";
+        return true;
+    }
 
 }
 public class AnimationEvent<T0, T1, T2, T3> : UnityEvent<T0, T1, T2, T3>
@@ -205,4 +279,8 @@ public class AnimationEvent<T0, T1, T2, T3> : UnityEvent<T0, T1, T2, T3>
         return false;
     }
     public virtual string GetName() => name;
+    public virtual bool TryGetAnimationKey(out string animationKey) { 
+        animationKey = $"{GetType()}_{GetName()}";
+        return true;
+    } 
 }
